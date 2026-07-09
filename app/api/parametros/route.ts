@@ -17,11 +17,11 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const {
-    periodo, uf, utm,
+    periodo, uf, utm, imm,
     tope_imponible_afp_salud_uf, tope_imponible_cesantia_uf,
     tasa_afc_indefinido_trabajador, tasa_afc_indefinido_empleador,
     tasa_afc_plazo_fijo_empleador, tasa_salud_fonasa,
-    tramos, // [{ tramo, desde, hasta, factor, rebaja }]
+    tramos,
   } = body;
 
   if (!periodo || !uf || !utm) {
@@ -30,17 +30,20 @@ export async function POST(req: NextRequest) {
 
   await sql`
     INSERT INTO parametros_periodo (
-      periodo, uf, utm, tope_imponible_afp_salud_uf, tope_imponible_cesantia_uf,
+      periodo, uf, utm, imm,
+      tope_imponible_afp_salud_uf, tope_imponible_cesantia_uf,
       tasa_afc_indefinido_trabajador, tasa_afc_indefinido_empleador,
       tasa_afc_plazo_fijo_empleador, tasa_salud_fonasa
     ) VALUES (
-      ${periodo}, ${uf}, ${utm}, ${tope_imponible_afp_salud_uf || 90.0}, ${tope_imponible_cesantia_uf || 135.2},
+      ${periodo}, ${uf}, ${utm}, ${imm || 510966},
+      ${tope_imponible_afp_salud_uf || 90.0}, ${tope_imponible_cesantia_uf || 135.2},
       ${tasa_afc_indefinido_trabajador || 0.6}, ${tasa_afc_indefinido_empleador || 2.4},
       ${tasa_afc_plazo_fijo_empleador || 3.0}, ${tasa_salud_fonasa || 7.0}
     )
     ON CONFLICT (periodo) DO UPDATE SET
       uf = EXCLUDED.uf,
       utm = EXCLUDED.utm,
+      imm = EXCLUDED.imm,
       tope_imponible_afp_salud_uf = EXCLUDED.tope_imponible_afp_salud_uf,
       tope_imponible_cesantia_uf = EXCLUDED.tope_imponible_cesantia_uf,
       tasa_afc_indefinido_trabajador = EXCLUDED.tasa_afc_indefinido_trabajador,
