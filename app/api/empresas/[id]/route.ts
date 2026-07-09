@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  const [empresa] = await sql`SELECT * FROM empresas WHERE id = ${params.id}`;
+type RouteContext = { params: Promise<{ id: string }> };
+
+export async function GET(_req: NextRequest, { params }: RouteContext) {
+  const { id } = await params;
+  const [empresa] = await sql`SELECT * FROM empresas WHERE id = ${id}`;
   if (!empresa) return NextResponse.json({ error: "No encontrada" }, { status: 404 });
   return NextResponse.json({ empresa });
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: RouteContext) {
+  const { id } = await params;
   const body = await req.json();
   const fields = [
     "rut", "razon_social", "nombre_fantasia", "giro", "regimen_tributario",
@@ -28,7 +32,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (updates.length === 0) {
     return NextResponse.json({ error: "Nada que actualizar" }, { status: 400 });
   }
-  values.push(params.id);
+  values.push(id);
 
   const query = `UPDATE empresas SET ${updates.join(", ")} WHERE id = $${i}`;
   await sql(query, values);
@@ -36,7 +40,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   return NextResponse.json({ ok: true });
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
-  await sql`UPDATE empresas SET activa = false WHERE id = ${params.id}`;
+export async function DELETE(_req: NextRequest, { params }: RouteContext) {
+  const { id } = await params;
+  await sql`UPDATE empresas SET activa = false WHERE id = ${id}`;
   return NextResponse.json({ ok: true });
 }

@@ -4,11 +4,16 @@ import NuevoTrabajadorForm from "./NuevoTrabajadorForm";
 
 export const dynamic = "force-dynamic";
 
-export default async function EmpresaDetallePage({ params }: { params: { id: string } }) {
-  const [empresa] = await sql`SELECT * FROM empresas WHERE id = ${params.id}`;
+export default async function EmpresaDetallePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const [empresa] = await sql`SELECT * FROM empresas WHERE id = ${id}`;
   const trabajadores = await sql`
     SELECT id, rut, nombres, apellidos, tipo_contrato, cargo, activo
-    FROM trabajadores WHERE empresa_id = ${params.id} ORDER BY apellidos ASC
+    FROM trabajadores WHERE empresa_id = ${id} ORDER BY apellidos ASC
   `;
 
   if (!empresa) {
