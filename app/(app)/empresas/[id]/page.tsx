@@ -40,13 +40,15 @@ export default async function EmpresaDetallePage({
         </p>
       </div>
 
-      <nav className="flex gap-3 mb-8 text-sm flex-wrap">
+      <nav className="flex gap-2 mb-8 text-sm flex-wrap">
         <span className="px-3 py-1.5 rounded-full bg-teal-700 text-white">Trabajadores</span>
-        <Link
-          href={`/empresas/${empresa.id}/remuneraciones`}
-          className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition"
-        >
+        <Link href={`/empresas/${empresa.id}/remuneraciones`}
+          className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition">
           Remuneraciones
+        </Link>
+        <Link href={`/empresas/${empresa.id}/previred`}
+          className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition">
+          Previred + LRE
         </Link>
         <span className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-400">
           F29 (próximamente)
@@ -57,7 +59,7 @@ export default async function EmpresaDetallePage({
 
       <div className="mt-8 divide-y divide-slate-200 border border-slate-200 rounded-xl bg-white overflow-hidden">
         {trabajadores.length === 0 && (
-          <p className="p-6 text-sm text-slate-500">Aún no agregas trabajadores para esta empresa.</p>
+          <p className="p-6 text-sm text-slate-500">Aún no agregas trabajadores.</p>
         )}
         {trabajadores.map((t: any) => (
           <Link
@@ -66,12 +68,8 @@ export default async function EmpresaDetallePage({
             className="flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition"
           >
             <div>
-              <p className="font-medium text-slate-900">
-                {t.nombres} {t.apellidos}
-              </p>
-              <p className="text-sm text-slate-500">
-                {t.rut} {t.cargo ? `· ${t.cargo}` : ""}
-              </p>
+              <p className="font-medium text-slate-900">{t.nombres} {t.apellidos}</p>
+              <p className="text-sm text-slate-500">{t.rut}{t.cargo ? ` · ${t.cargo}` : ""}</p>
             </div>
             <span className="text-xs text-slate-500 bg-slate-100 rounded-full px-3 py-1">
               {contratoLabel[t.tipo_contrato] || t.tipo_contrato}
