@@ -20,6 +20,14 @@ export default async function EmpresaDetallePage({
     por_obra: "Por obra/faena", honorarios: "Honorarios",
   };
 
+  const navLinks = [
+    { href: `/empresas/${empresa.id}/remuneraciones`, label: "Remuneraciones" },
+    { href: `/empresas/${empresa.id}/previred`,       label: "Previred + LRE" },
+    { href: `/empresas/${empresa.id}/f29`,            label: "F29" },
+    { href: `/empresas/${empresa.id}/ddjj`,           label: "DJ 1887/1879" },
+    { href: `/empresas/${empresa.id}/recomendaciones`,label: "Recomendaciones" },
+  ];
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
       <Link href="/empresas" className="text-sm text-teal-700 hover:underline">← Empresas</Link>
@@ -30,22 +38,19 @@ export default async function EmpresaDetallePage({
           {empresa.regimen_iva ? ` · IVA: ${empresa.regimen_iva.replace(/_/g," ")}` : ""}
         </p>
       </div>
+
       <nav className="flex gap-2 mb-8 text-sm flex-wrap">
         <span className="px-3 py-1.5 rounded-full bg-teal-700 text-white">Trabajadores</span>
-        <Link href={`/empresas/${empresa.id}/remuneraciones`}
-          className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition">
-          Remuneraciones
-        </Link>
-        <Link href={`/empresas/${empresa.id}/previred`}
-          className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition">
-          Previred + LRE
-        </Link>
-        <Link href={`/empresas/${empresa.id}/f29`}
-          className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition">
-          F29
-        </Link>
+        {navLinks.map((l) => (
+          <Link key={l.href} href={l.href}
+            className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition">
+            {l.label}
+          </Link>
+        ))}
       </nav>
+
       <NuevoTrabajadorForm empresaId={empresa.id} />
+
       <div className="mt-8 divide-y divide-slate-200 border border-slate-200 rounded-xl bg-white overflow-hidden">
         {trabajadores.length === 0 && (
           <p className="p-6 text-sm text-slate-500">Aún no agregas trabajadores.</p>
