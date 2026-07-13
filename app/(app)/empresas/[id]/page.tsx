@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { sql } from "@/lib/db";
 import NuevoTrabajadorForm from "./NuevoTrabajadorForm";
+import EditarEmpresaForm from "./EditarEmpresaForm";
 
 export const dynamic = "force-dynamic";
 
@@ -22,28 +23,44 @@ export default async function EmpresaDetallePage({
 
   const navLinks = [
     { href: `/empresas/${empresa.id}/remuneraciones`, label: "Remuneraciones" },
-    { href: `/empresas/${empresa.id}/previred`,       label: "Previred + LRE" },
-    { href: `/empresas/${empresa.id}/f29`,            label: "F29" },
-    { href: `/empresas/${empresa.id}/ddjj`,           label: "DJ 1887/1879" },
-    { href: `/empresas/${empresa.id}/recomendaciones`,label: "Recomendaciones" },
+    { href: `/empresas/${empresa.id}/previred`,        label: "Previred + LRE" },
+    { href: `/empresas/${empresa.id}/f29`,             label: "F29" },
+    { href: `/empresas/${empresa.id}/ddjj`,            label: "DJ 1887/1879" },
+    { href: `/empresas/${empresa.id}/vacaciones`,      label: "Vacaciones" },
+    { href: `/empresas/${empresa.id}/prestamos`,       label: "Préstamos" },
+    { href: `/empresas/${empresa.id}/cargas`,          label: "Cargas Fam." },
+    { href: `/empresas/${empresa.id}/finiquitos`,      label: "Finiquitos" },
+    { href: `/empresas/${empresa.id}/contabilidad`,    label: "Contabilidad" },
+    { href: `/empresas/${empresa.id}/activos`,         label: "Activos Fijos" },
+    { href: `/empresas/${empresa.id}/conciliacion`,    label: "Conciliación" },
+    { href: `/empresas/${empresa.id}/honorarios`,      label: "Honorarios" },
+    { href: `/empresas/${empresa.id}/dte`,             label: "DTE" },
+    { href: `/empresas/${empresa.id}/centros-costo`,   label: "Centros Costo" },
+    { href: `/empresas/${empresa.id}/reportes`,        label: "Reportes" },
+    { href: `/empresas/${empresa.id}/recomendaciones`, label: "Recomendaciones" },
   ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
+    <div className="max-w-5xl mx-auto px-4 py-10">
       <Link href="/empresas" className="text-sm text-teal-700 hover:underline">← Empresas</Link>
-      <div className="mt-3 mb-6">
-        <h1 className="text-2xl font-semibold text-slate-900">{empresa.razon_social}</h1>
-        <p className="text-sm text-slate-500">
-          {empresa.rut} · {empresa.regimen_tributario || "Régimen no definido"}
-          {empresa.regimen_iva ? ` · IVA: ${empresa.regimen_iva.replace(/_/g," ")}` : ""}
-        </p>
+      <div className="mt-3 mb-2 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">{empresa.razon_social}</h1>
+          <p className="text-sm text-slate-500">
+            {empresa.rut}
+            {empresa.regimen_tributario ? ` · ${empresa.regimen_tributario.replace(/_/g," ")}` : ""}
+            {empresa.regimen_iva ? ` · IVA: ${empresa.regimen_iva.replace(/_/g," ")}` : ""}
+            {empresa.mutualidad ? ` · ${empresa.mutualidad}` : ""}
+          </p>
+        </div>
+        <EditarEmpresaForm empresa={empresa} />
       </div>
 
-      <nav className="flex gap-2 mb-8 text-sm flex-wrap">
-        <span className="px-3 py-1.5 rounded-full bg-teal-700 text-white">Trabajadores</span>
+      <nav className="flex gap-2 my-6 text-sm flex-wrap">
+        <span className="px-3 py-1.5 rounded-full bg-teal-700 text-white font-medium text-xs">Trabajadores</span>
         {navLinks.map((l) => (
           <Link key={l.href} href={l.href}
-            className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition">
+            className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition text-xs font-medium">
             {l.label}
           </Link>
         ))}
@@ -51,7 +68,7 @@ export default async function EmpresaDetallePage({
 
       <NuevoTrabajadorForm empresaId={empresa.id} />
 
-      <div className="mt-8 divide-y divide-slate-200 border border-slate-200 rounded-xl bg-white overflow-hidden">
+      <div className="mt-6 divide-y divide-slate-200 border border-slate-200 rounded-xl bg-white overflow-hidden">
         {trabajadores.length === 0 && (
           <p className="p-6 text-sm text-slate-500">Aún no agregas trabajadores.</p>
         )}

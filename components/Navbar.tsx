@@ -1,11 +1,10 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
+  const router   = useRouter();
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -14,7 +13,7 @@ export default function Navbar() {
   }
 
   const link = (href: string, label: string) => {
-    const active = pathname.startsWith(href);
+    const active = pathname === href || (href !== "/" && pathname.startsWith(href));
     return (
       <Link href={href}
         className={`text-sm px-3 py-1.5 rounded-lg transition ${
@@ -29,9 +28,10 @@ export default function Navbar() {
     <nav className="border-b border-slate-200 bg-white sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-1 flex-wrap">
-          <Link href="/empresas" className="font-bold text-teal-700 mr-3 text-sm">
+          <Link href="/dashboard" className="font-bold text-teal-700 mr-3 text-sm">
             ContaPyme
           </Link>
+          {link("/dashboard", "Dashboard")}
           {link("/empresas", "Empresas")}
           {link("/parametros", "Parámetros")}
         </div>
