@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/parametros/sincronizar",
+      "schedule": "0 9 10 * *"
+    }
+  ]
+}
