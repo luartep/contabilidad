@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
-
-// Vidas útiles SII Chile
-export const VIDAS_UTILES_SII: Record<string, number> = {
-  maquinaria: 15, vehiculo: 7, muebles: 7,
-  equipos_computacion: 6, edificio: 40, otro: 10,
-};
+import { VIDAS_UTILES_SII } from "@/lib/activosSII";
 
 function calcularDepreciacion(
   valorAdquisicion: number, valorResidual: number,
