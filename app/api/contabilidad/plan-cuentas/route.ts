@@ -1,65 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
-
-// Plan de cuentas estándar Chile para pymes (simplificado)
-export const PLAN_CUENTAS_BASE = [
-  // ACTIVO
-  { codigo: "1", nombre: "ACTIVO", tipo: "activo", es_imputable: false },
-  { codigo: "1.1", nombre: "Activo Corriente", tipo: "activo", subtipo: "corriente", es_imputable: false },
-  { codigo: "1.1.01", nombre: "Caja", tipo: "activo", subtipo: "corriente", cuenta_padre: "1.1" },
-  { codigo: "1.1.02", nombre: "Banco", tipo: "activo", subtipo: "corriente", cuenta_padre: "1.1" },
-  { codigo: "1.1.03", nombre: "Clientes", tipo: "activo", subtipo: "corriente", cuenta_padre: "1.1" },
-  { codigo: "1.1.04", nombre: "Documentos por Cobrar", tipo: "activo", subtipo: "corriente", cuenta_padre: "1.1" },
-  { codigo: "1.1.05", nombre: "IVA Crédito Fiscal", tipo: "activo", subtipo: "corriente", cuenta_padre: "1.1" },
-  { codigo: "1.1.06", nombre: "PPM por Recuperar", tipo: "activo", subtipo: "corriente", cuenta_padre: "1.1" },
-  { codigo: "1.1.07", nombre: "Existencias / Inventario", tipo: "activo", subtipo: "corriente", cuenta_padre: "1.1" },
-  { codigo: "1.1.08", nombre: "Otros Activos Corrientes", tipo: "activo", subtipo: "corriente", cuenta_padre: "1.1" },
-  { codigo: "1.2", nombre: "Activo No Corriente", tipo: "activo", subtipo: "no_corriente", es_imputable: false },
-  { codigo: "1.2.01", nombre: "Maquinaria y Equipos", tipo: "activo", subtipo: "no_corriente", cuenta_padre: "1.2" },
-  { codigo: "1.2.02", nombre: "Vehículos", tipo: "activo", subtipo: "no_corriente", cuenta_padre: "1.2" },
-  { codigo: "1.2.03", nombre: "Muebles y Útiles", tipo: "activo", subtipo: "no_corriente", cuenta_padre: "1.2" },
-  { codigo: "1.2.04", nombre: "Equipos Computacionales", tipo: "activo", subtipo: "no_corriente", cuenta_padre: "1.2" },
-  { codigo: "1.2.09", nombre: "Depreciación Acumulada", tipo: "activo", subtipo: "no_corriente", cuenta_padre: "1.2" },
-  // PASIVO
-  { codigo: "2", nombre: "PASIVO", tipo: "pasivo", es_imputable: false },
-  { codigo: "2.1", nombre: "Pasivo Corriente", tipo: "pasivo", subtipo: "corriente", es_imputable: false },
-  { codigo: "2.1.01", nombre: "Proveedores", tipo: "pasivo", subtipo: "corriente", cuenta_padre: "2.1" },
-  { codigo: "2.1.02", nombre: "Documentos por Pagar", tipo: "pasivo", subtipo: "corriente", cuenta_padre: "2.1" },
-  { codigo: "2.1.03", nombre: "IVA Débito Fiscal", tipo: "pasivo", subtipo: "corriente", cuenta_padre: "2.1" },
-  { codigo: "2.1.04", nombre: "Remuneraciones por Pagar", tipo: "pasivo", subtipo: "corriente", cuenta_padre: "2.1" },
-  { codigo: "2.1.05", nombre: "Cotizaciones Previsionales por Pagar", tipo: "pasivo", subtipo: "corriente", cuenta_padre: "2.1" },
-  { codigo: "2.1.06", nombre: "Impuestos por Pagar", tipo: "pasivo", subtipo: "corriente", cuenta_padre: "2.1" },
-  { codigo: "2.1.07", nombre: "Vacaciones por Pagar", tipo: "pasivo", subtipo: "corriente", cuenta_padre: "2.1" },
-  { codigo: "2.1.08", nombre: "Otros Pasivos Corrientes", tipo: "pasivo", subtipo: "corriente", cuenta_padre: "2.1" },
-  { codigo: "2.2", nombre: "Pasivo No Corriente", tipo: "pasivo", subtipo: "no_corriente", es_imputable: false },
-  { codigo: "2.2.01", nombre: "Préstamos Bancarios Largo Plazo", tipo: "pasivo", subtipo: "no_corriente", cuenta_padre: "2.2" },
-  // PATRIMONIO
-  { codigo: "3", nombre: "PATRIMONIO", tipo: "patrimonio", es_imputable: false },
-  { codigo: "3.1.01", nombre: "Capital", tipo: "patrimonio", cuenta_padre: "3" },
-  { codigo: "3.1.02", nombre: "Utilidades Retenidas", tipo: "patrimonio", cuenta_padre: "3" },
-  { codigo: "3.1.03", nombre: "Utilidad / Pérdida del Ejercicio", tipo: "patrimonio", cuenta_padre: "3" },
-  // INGRESOS
-  { codigo: "4", nombre: "INGRESOS", tipo: "ingreso", es_imputable: false },
-  { codigo: "4.1.01", nombre: "Ventas de Servicios", tipo: "ingreso", cuenta_padre: "4" },
-  { codigo: "4.1.02", nombre: "Ventas de Productos", tipo: "ingreso", cuenta_padre: "4" },
-  { codigo: "4.1.03", nombre: "Otros Ingresos Operacionales", tipo: "ingreso", cuenta_padre: "4" },
-  { codigo: "4.2.01", nombre: "Ingresos Financieros", tipo: "ingreso", cuenta_padre: "4" },
-  { codigo: "4.2.02", nombre: "Otros Ingresos No Operacionales", tipo: "ingreso", cuenta_padre: "4" },
-  // EGRESOS / GASTOS
-  { codigo: "5", nombre: "GASTOS", tipo: "egreso", es_imputable: false },
-  { codigo: "5.1.01", nombre: "Sueldos y Salarios", tipo: "egreso", cuenta_padre: "5" },
-  { codigo: "5.1.02", nombre: "Cotizaciones Previsionales Empleador", tipo: "egreso", cuenta_padre: "5" },
-  { codigo: "5.1.03", nombre: "Gratificaciones", tipo: "egreso", cuenta_padre: "5" },
-  { codigo: "5.1.04", nombre: "Honorarios", tipo: "egreso", cuenta_padre: "5" },
-  { codigo: "5.2.01", nombre: "Arriendo", tipo: "egreso", cuenta_padre: "5" },
-  { codigo: "5.2.02", nombre: "Servicios Básicos", tipo: "egreso", cuenta_padre: "5" },
-  { codigo: "5.2.03", nombre: "Gastos de Oficina", tipo: "egreso", cuenta_padre: "5" },
-  { codigo: "5.2.04", nombre: "Comunicaciones", tipo: "egreso", cuenta_padre: "5" },
-  { codigo: "5.2.05", nombre: "Gastos de Vehículo", tipo: "egreso", cuenta_padre: "5" },
-  { codigo: "5.2.06", nombre: "Depreciación del Ejercicio", tipo: "egreso", cuenta_padre: "5" },
-  { codigo: "5.3.01", nombre: "Gastos Financieros / Intereses", tipo: "egreso", cuenta_padre: "5" },
-  { codigo: "5.3.02", nombre: "Otros Gastos No Operacionales", tipo: "egreso", cuenta_padre: "5" },
-];
+import { PLAN_CUENTAS_BASE } from "@/lib/planCuentasBase";
 
 export async function GET(req: NextRequest) {
   const empresa_id = req.nextUrl.searchParams.get("empresa_id");
@@ -94,7 +35,8 @@ export async function POST(req: NextRequest) {
   }
 
   // Agregar una cuenta individual
-  const { codigo, nombre, tipo, subtipo, cuenta_padre, es_imputable } = await req.json();
+  const body = await req.json();
+  const { codigo, nombre, tipo, subtipo, cuenta_padre, es_imputable } = body;
   await sql`
     INSERT INTO plan_cuentas (empresa_id, codigo, nombre, tipo, subtipo, cuenta_padre, es_imputable)
     VALUES (${empresa_id}, ${codigo}, ${nombre}, ${tipo}, ${subtipo || null},

@@ -1,17 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
-
-export const TIPOS_DTE: Record<number, string> = {
-  33: "Factura Afecta",
-  34: "Factura Exenta",
-  39: "Boleta Afecta",
-  41: "Boleta Exenta",
-  46: "Liquidación-Factura",
-  52: "Guía de Despacho",
-  56: "Nota de Débito",
-  61: "Nota de Crédito",
-  110: "Factura Exportación",
-};
+import { TIPOS_DTE } from "@/lib/tiposDte";
 
 export async function GET(req: NextRequest) {
   const empresa_id = req.nextUrl.searchParams.get("empresa_id");
