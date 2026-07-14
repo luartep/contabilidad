@@ -6,12 +6,21 @@ export async function GET(req: NextRequest) {
   if (!empresaId) {
     return NextResponse.json({ error: "Falta empresa_id" }, { status: 400 });
   }
-  const trabajadores = await sql`
-    SELECT id, rut, nombres, apellidos, tipo_contrato, cargo, afp, sistema_salud, activo
-    FROM trabajadores
-    WHERE empresa_id = ${empresaId}
-    ORDER BY apellidos ASC
-  `;
+  const soloActivos = req.nextUrl.searchParams.get("activos") === "true";
+
+  const trabajadores = soloActivos
+    ? await sql`
+        SELECT id, rut, nombres, apellidos, tipo_contrato, cargo, afp, sistema_salud, activo, fecha_ingreso
+        FROM trabajadores
+        WHERE empresa_id = ${empresaId} AND activo = true
+        ORDER BY apellidos ASC
+      `
+    : await sql`
+        SELECT id, rut, nombres, apellidos, tipo_contrato, cargo, afp, sistema_salud, activo, fecha_ingreso
+        FROM trabajadores
+        WHERE empresa_id = ${empresaId}
+        ORDER BY apellidos ASC
+      `;
   return NextResponse.json({ trabajadores });
 }
 

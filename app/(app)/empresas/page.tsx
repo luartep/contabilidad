@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import NuevaEmpresaForm from "./NuevaEmpresaForm";
 
@@ -11,15 +11,20 @@ export default function EmpresasPage() {
   const [cargando, setCargando]         = useState(true);
   const [eliminando, setEliminando]     = useState<number | null>(null);
 
-  async function cargar() {
+  const cargar = useCallback(async () => {
     setCargando(true);
-    const res = await fetch(`/api/empresas${mostrarInactivas ? "?todas=1" : ""}`);
-    const data = await res.json();
-    setEmpresas(data.empresas || []);
-    setCargando(false);
-  }
+    try {
+      const res = await fetch(`/api/empresas${mostrarInactivas ? "?todas=1" : ""}`);
+      const data = await res.json();
+      setEmpresas(data.empresas || []);
+    } catch (err) {
+      console.error("Error cargando empresas:", err);
+    } finally {
+      setCargando(false);
+    }
+  }, [mostrarInactivas]);
 
-  useEffect(() => { cargar(); }, [mostrarInactivas]);
+  useEffect(() => { cargar(); }, [cargar]);
 
   async function handleEliminar(e: any) {
     const accion = confirm(

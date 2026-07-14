@@ -23,13 +23,23 @@ export default function FiniquitosPage() {
     descuentos: "0", tiene_aviso_previo: false, observaciones: "",
   });
   const [guardando, setGuardando] = useState(false);
+
+  function handleSeleccionarTrabajador(tid: string) {
+    const t = trabajadores.find((w: any) => String(w.id) === tid);
+    setForm((prev) => ({
+      ...prev,
+      trabajador_id: tid,
+      // Pre-rellenar días del mes con el mes actual
+      dias_mes_termino: String(new Date(prev.fecha_termino).getDate() <= 28 ? 30 : new Date(new Date(prev.fecha_termino).getFullYear(), new Date(prev.fecha_termino).getMonth() + 1, 0).getDate()),
+    }));
+  }
   const [msg, setMsg] = useState("");
 
   const cargar = useCallback(async () => {
     const [eRes, fRes, tRes] = await Promise.all([
       fetch(`/api/empresas/${id}`),
       fetch(`/api/finiquitos?empresa_id=${id}`),
-      fetch(`/api/trabajadores?empresa_id=${id}`),
+      fetch(`/api/trabajadores?empresa_id=${id}&activos=true`),
     ]);
     setEmpresa((await eRes.json()).empresa);
     setFiniquitos((await fRes.json()).finiquitos || []);
@@ -79,10 +89,10 @@ export default function FiniquitosPage() {
             <div className="space-y-1">
               <label className="text-xs font-medium text-slate-600">Trabajador</label>
               <select required className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                value={form.trabajador_id} onChange={(e) => setForm({ ...form, trabajador_id: e.target.value })}>
+                value={form.trabajador_id} onChange={(e) => handleSeleccionarTrabajador(e.target.value)}>
                 <option value="">Seleccionar...</option>
                 {trabajadores.map((t: any) => (
-                  <option key={t.id} value={t.id}>{t.nombres} {t.apellidos} — {t.rut}</option>
+                  <option key={t.id} value={t.id}>{t.nombres} {t.apellidos} — {t.rut}{t.fecha_ingreso ? ` (ingreso: ${new Date(t.fecha_ingreso).toLocaleDateString('es-CL')})` : ''}</option>
                 ))}
               </select>
             </div>

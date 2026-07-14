@@ -3,12 +3,20 @@ import { sql } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
   const incluirInactivas = req.nextUrl.searchParams.get("todas") === "1";
-  const empresas = await sql`
-    SELECT id, rut, razon_social, nombre_fantasia, regimen_tributario, activa, notas_internas
-    FROM empresas
-    ${incluirInactivas ? sql`` : sql`WHERE activa = true`}
-    ORDER BY razon_social ASC
-  `;
+
+  const empresas = incluirInactivas
+    ? await sql`
+        SELECT id, rut, razon_social, nombre_fantasia, regimen_tributario, activa, notas_internas
+        FROM empresas
+        ORDER BY razon_social ASC
+      `
+    : await sql`
+        SELECT id, rut, razon_social, nombre_fantasia, regimen_tributario, activa, notas_internas
+        FROM empresas
+        WHERE activa = true
+        ORDER BY razon_social ASC
+      `;
+
   return NextResponse.json({ empresas });
 }
 
