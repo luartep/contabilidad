@@ -265,12 +265,47 @@ export default function FichaTrabajadorPage() {
         </div>
       )}
 
-      <div className="flex items-center gap-3 pb-8">
+      <div className="flex items-center gap-3 pb-4 flex-wrap">
         <button onClick={handleGuardar} disabled={saving}
           className="rounded-lg bg-teal-700 text-white text-sm font-medium px-5 py-2.5 hover:bg-teal-800 transition disabled:opacity-60">
           {saving ? "Guardando..." : "Guardar ficha"}
         </button>
         {msg && <span className="text-sm text-teal-700">{msg}</span>}
+      </div>
+
+      {/* Acciones trabajador */}
+      <div className="border border-slate-200 rounded-xl bg-white p-5 pb-6 space-y-3">
+        <h2 className="text-sm font-semibold text-slate-700">Estado del trabajador</h2>
+        {t.activo !== false ? (
+          <button
+            onClick={async () => {
+              if (!confirm("¿Desactivar a " + t.nombres + " " + t.apellidos + "?\n\nSe conserva todo el historial. Puedes reactivarlo después.")) return;
+              await fetch("/api/trabajadores/" + tid, { method: "DELETE" });
+              window.location.href = "/empresas/" + id;
+            }}
+            className="rounded-lg border border-slate-200 text-slate-600 text-sm px-4 py-2 hover:bg-slate-50"
+          >
+            ⏸ Desactivar trabajador <span className="text-xs text-slate-400">(ocultar de nómina, sin borrar datos)</span>
+          </button>
+        ) : (
+          <div className="space-y-2">
+            <span className="inline-block text-xs bg-slate-200 text-slate-500 rounded-full px-3 py-1">Trabajador inactivo</span>
+            <br />
+            <button
+              onClick={async () => {
+                await fetch("/api/trabajadores/" + tid, {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ activo: true }),
+                });
+                window.location.reload();
+              }}
+              className="rounded-lg border border-teal-200 text-teal-700 text-sm px-4 py-2 hover:bg-teal-50"
+            >
+              ▶ Reactivar trabajador
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

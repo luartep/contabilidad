@@ -66,3 +66,10 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
 
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(_req: NextRequest, { params }: RouteContext) {
+  const { id } = await params;
+  // Soft delete — mantiene historial de liquidaciones
+  await sql`UPDATE trabajadores SET activo = false WHERE id = ${id}`;
+  return NextResponse.json({ ok: true });
+}

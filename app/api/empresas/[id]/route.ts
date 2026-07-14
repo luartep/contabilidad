@@ -16,7 +16,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
   const fields = [
     "rut", "razon_social", "nombre_fantasia", "giro", "regimen_tributario",
     "representante_legal", "direccion", "email_contacto", "telefono_contacto",
-    "mutualidad", "tasa_accidentes", "caja_compensacion", "activa",
+    "mutualidad", "tasa_accidentes", "caja_compensacion", "activa", "notas_internas",
   ];
 
   const updates: string[] = [];
@@ -40,8 +40,17 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
   return NextResponse.json({ ok: true });
 }
 
-export async function DELETE(_req: NextRequest, { params }: RouteContext) {
+export async function DELETE(req: NextRequest, { params }: RouteContext) {
   const { id } = await params;
-  await sql`UPDATE empresas SET activa = false WHERE id = ${id}`;
+  const { definitivo } = await req.json().catch(() => ({ definitivo: false }));
+
+  if (definitivo) {
+    // Borrado físico total en cascada (todas las FK tienen ON DELETE CASCADE)
+    await sql`DELETE FROM empresas WHERE id = ${id}`;
+  } else {
+    // Solo desactivar (soft delete)
+    await sql`UPDATE empresas SET activa = false WHERE id = ${id}`;
+  }
+
   return NextResponse.json({ ok: true });
 }

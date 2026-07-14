@@ -2,6 +2,7 @@ import Link from "next/link";
 import { sql } from "@/lib/db";
 import NuevoTrabajadorForm from "./NuevoTrabajadorForm";
 import EditarEmpresaForm from "./EditarEmpresaForm";
+import AccionesEmpresa from "./AccionesEmpresa";
 
 export const dynamic = "force-dynamic";
 
@@ -40,12 +41,20 @@ export default async function EmpresaDetallePage({
     { href: `/empresas/${empresa.id}/recomendaciones`, label: "Recomendaciones" },
   ];
 
+  const activos   = trabajadores.filter((t: any) => t.activo);
+  const inactivos = trabajadores.filter((t: any) => !t.activo);
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
       <Link href="/empresas" className="text-sm text-teal-700 hover:underline">← Empresas</Link>
-      <div className="mt-3 mb-2 flex items-start justify-between gap-4">
+      <div className="mt-3 mb-2 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{empresa.razon_social}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-semibold text-slate-900">{empresa.razon_social}</h1>
+            {!empresa.activa && (
+              <span className="text-xs bg-slate-200 text-slate-500 rounded-full px-2 py-1">Inactiva</span>
+            )}
+          </div>
           <p className="text-sm text-slate-500">
             {empresa.rut}
             {empresa.regimen_tributario ? ` · ${empresa.regimen_tributario.replace(/_/g," ")}` : ""}
@@ -53,8 +62,18 @@ export default async function EmpresaDetallePage({
             {empresa.mutualidad ? ` · ${empresa.mutualidad}` : ""}
           </p>
         </div>
-        <EditarEmpresaForm empresa={empresa} />
+        <div className="flex items-center gap-2">
+          <EditarEmpresaForm empresa={empresa} />
+          <AccionesEmpresa empresa={empresa} />
+        </div>
       </div>
+
+      {/* Notas internas */}
+      {empresa.notas_internas && (
+        <div className="mt-2 mb-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+          📝 {empresa.notas_internas}
+        </div>
+      )}
 
       <nav className="flex gap-2 my-6 text-sm flex-wrap">
         <span className="px-3 py-1.5 rounded-full bg-teal-700 text-white font-medium text-xs">Trabajadores</span>
@@ -68,11 +87,12 @@ export default async function EmpresaDetallePage({
 
       <NuevoTrabajadorForm empresaId={empresa.id} />
 
+      {/* Trabajadores activos */}
       <div className="mt-6 divide-y divide-slate-200 border border-slate-200 rounded-xl bg-white overflow-hidden">
-        {trabajadores.length === 0 && (
-          <p className="p-6 text-sm text-slate-500">Aún no agregas trabajadores.</p>
+        {activos.length === 0 && (
+          <p className="p-6 text-sm text-slate-500">Aún no agregas trabajadores activos.</p>
         )}
-        {trabajadores.map((t: any) => (
+        {activos.map((t: any) => (
           <Link key={t.id} href={`/empresas/${empresa.id}/trabajadores/${t.id}`}
             className="flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition">
             <div>
@@ -85,6 +105,27 @@ export default async function EmpresaDetallePage({
           </Link>
         ))}
       </div>
+
+      {/* Trabajadores inactivos (colapsado) */}
+      {inactivos.length > 0 && (
+        <details className="mt-4">
+          <summary className="text-sm text-slate-400 cursor-pointer hover:text-slate-600 select-none">
+            {inactivos.length} trabajador{inactivos.length > 1 ? "es" : ""} inactivo{inactivos.length > 1 ? "s" : ""}
+          </summary>
+          <div className="mt-2 divide-y divide-slate-200 border border-slate-200 rounded-xl bg-white overflow-hidden opacity-60">
+            {inactivos.map((t: any) => (
+              <Link key={t.id} href={`/empresas/${empresa.id}/trabajadores/${t.id}`}
+                className="flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition">
+                <div>
+                  <p className="font-medium text-slate-900">{t.nombres} {t.apellidos}</p>
+                  <p className="text-sm text-slate-500">{t.rut}{t.cargo ? ` · ${t.cargo}` : ""}</p>
+                </div>
+                <span className="text-xs text-slate-400 bg-slate-100 rounded-full px-3 py-1">Inactivo</span>
+              </Link>
+            ))}
+          </div>
+        </details>
+      )}
     </div>
   );
 }
